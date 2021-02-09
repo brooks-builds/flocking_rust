@@ -8,4 +8,4 @@ version = "0.1.0"
 
 [dependencies]
 bbecs = {path = "../bbecs"}
-ggez = "0.6.0-rc1"
+ggez = "0.5"

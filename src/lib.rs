@@ -11,24 +11,18 @@ use ggez::{
 };
 use graphics::{Color, Mesh, MeshBuilder};
 
-pub struct FlockingRustState<T>
-where
-    T: Send + Sync + 'static + Debug,
-{
+pub struct FlockingRustState {
     background_color: Color,
-    world: World<T>,
+    world: World,
     bird_mesh: Mesh,
 }
 
-impl<Thing> FlockingRustState<Thing>
-where
-    Thing: Sync + Send + 'static + Debug,
-{
+impl FlockingRustState {
     pub fn new(context: &mut Context) -> GameResult<Self> {
-        let background_color = Color::BLACK;
+        let background_color = graphics::BLACK;
         let mut world = World::new();
         let bird_mesh = MeshBuilder::new()
-            .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, Color::WHITE)?
+            .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
             .build(context)?;
 
         let location = Location::new(50.9, 50.0);
@@ -42,10 +36,7 @@ where
     }
 }
 
-impl<T> EventHandler for FlockingRustState<T>
-where
-    T: Sync + Send + 'static + Debug,
-{
+impl EventHandler for FlockingRustState {
     fn update(&mut self, _ctx: &mut ggez::Context) -> GameResult {
         Ok(())
     }
