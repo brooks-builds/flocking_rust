@@ -1,9 +1,10 @@
 mod components;
+mod systems;
 
 use std::fmt::Debug;
 
 use bbecs::world::World;
-use components::Location;
+use components::{Location, Velocity};
 use ggez::{
     event::EventHandler,
     graphics::{self, DrawMode, DrawParam},
@@ -25,8 +26,10 @@ impl FlockingRustState {
             .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
             .build(context)?;
 
-        let location = Location::new(50.9, 50.0);
-        world.insert_entity(vec![location]);
+        world.insert_entity(vec![Location::new(50.0, 50.0)]);
+        world.insert_entity(vec![Velocity::new(0.5, 0.5)]);
+        world.insert_entity(vec![Location::new(200.0, 200.0)]);
+        world.insert_entity(vec![Velocity::new(0.5, 0.5)]);
 
         Ok(Self {
             background_color,
@@ -43,7 +46,7 @@ impl EventHandler for FlockingRustState {
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
         graphics::clear(context, self.background_color);
-        graphics::draw(context, &self.bird_mesh, DrawParam::default())?;
+        systems::draw_system(&self.world, context, &self.bird_mesh)?;
         graphics::present(context)
     }
 }
