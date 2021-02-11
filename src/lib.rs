@@ -26,10 +26,15 @@ impl FlockingRustState {
             .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
             .build(context)?;
 
-        world.insert_entity(vec![Location::new(50.0, 50.0)]);
-        world.insert_entity(vec![Velocity::new(0.5, 0.5)]);
-        world.insert_entity(vec![Location::new(200.0, 200.0)]);
-        world.insert_entity(vec![Velocity::new(0.5, 0.5)]);
+        world
+            .spawn_entity()
+            .with_component(Location::new(50.0, 50.0))
+            .with_component(Velocity::new(0.5, 0.5));
+
+        world
+            .spawn_entity()
+            .with_component(Location::new(150.0, 150.0))
+            .with_component(Velocity::new(0.5, 0.5));
 
         Ok(Self {
             background_color,

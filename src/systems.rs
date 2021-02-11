@@ -4,7 +4,7 @@ use ggez::graphics::{self, Mesh};
 use ggez::{Context, GameResult};
 use graphics::DrawParam;
 
-use crate::components::Location;
+use crate::components::{Location, Velocity};
 
 pub fn draw_system(world: &World, context: &mut Context, mesh: &Mesh) -> GameResult {
     let results = world.query(Query::new().with_type::<Location>());
@@ -23,5 +23,5 @@ pub fn draw_system(world: &World, context: &mut Context, mesh: &Mesh) -> GameRes
 }
 
 pub fn update_locations(world: &mut World) {
-    // query mut for locations and not mut for the velocities
+    let velocities = world.query(Query::new().with_type::<Velocity>())[0];
 }
