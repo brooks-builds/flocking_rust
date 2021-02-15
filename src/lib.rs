@@ -1,16 +1,15 @@
-mod components;
 mod systems;
 
-use std::fmt::Debug;
-
+use bbecs::components::Component;
 use bbecs::world::World;
-use components::{Location, Velocity};
 use ggez::{
     event::EventHandler,
-    graphics::{self, DrawMode, DrawParam},
+    graphics::{self, DrawMode},
     Context, GameResult,
 };
 use graphics::{Color, Mesh, MeshBuilder};
+use systems::draw_birds::draw_birds_system;
+use systems::update_locations::update_locations_system;
 
 pub struct FlockingRustState {
     background_color: Color,
@@ -28,13 +27,13 @@ impl FlockingRustState {
 
         world
             .spawn_entity()
-            .with_component(Location::new(50.0, 50.0))
-            .with_component(Velocity::new(0.5, 0.5));
+            .with_component("location", Component::create_vector_2(50.0, 50.0))
+            .with_component("velocity", Component::create_vector_2(0.5, 0.5));
 
         world
             .spawn_entity()
-            .with_component(Location::new(150.0, 150.0))
-            .with_component(Velocity::new(0.5, 0.5));
+            .with_component("location", Component::create_vector_2(150.0, 150.0))
+            .with_component("velocity", Component::create_vector_2(0.5, 0.5));
 
         Ok(Self {
             background_color,
@@ -46,12 +45,13 @@ impl FlockingRustState {
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, _ctx: &mut ggez::Context) -> GameResult {
+        update_locations_system(&mut self.world);
         Ok(())
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
         graphics::clear(context, self.background_color);
-        systems::draw_system(&self.world, context, &self.bird_mesh)?;
+        draw_birds_system(context, &self.bird_mesh, &mut self.world)?;
         graphics::present(context)
     }
 }
