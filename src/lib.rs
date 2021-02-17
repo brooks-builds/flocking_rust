@@ -1,5 +1,6 @@
 mod systems;
 
+use bbecs::components::point::Point;
 use bbecs::components::Component;
 use bbecs::resources::ResourcesData;
 use bbecs::world::World;
@@ -17,7 +18,8 @@ use systems::update_locations::update_locations_system;
 
 pub struct FlockingRustState {
     background_color: Color,
-    world: Rc<RefCell<World>>,
+    world: World,
+    bird_mesh: Mesh,
 }
 
 impl FlockingRustState {
@@ -30,43 +32,31 @@ impl FlockingRustState {
 
         world
             .spawn_entity()
-            .with_component("location", Component::create_vector_2(50.0, 50.0))
-            .with_component("velocity", Component::create_vector_2(0.5, 0.5));
+            .with_component("location", Component::Point(Point::new(50.0, 50.0)))
+            .with_component("velocity", Component::Point(Point::new(1.0, 1.0)));
 
         world
             .spawn_entity()
-            .with_component("location", Component::create_vector_2(150.0, 150.0))
-            .with_component("velocity", Component::create_vector_2(0.5, 0.5));
-
-        world.insert_resource("target_fps", ResourcesData::U32(60));
-        world.insert_resource("bird_mesh", ResourcesData::GgezMesh(bird_mesh));
+            .with_component("location", Component::Point(Point::new(75.0, 150.0)))
+            .with_component("velocity", Component::Point(Point::new(1.0, 1.0)));
 
         Ok(Self {
             background_color,
-            world: Rc::new(RefCell::new(world)),
+            world,
+            bird_mesh,
         })
     }
 }
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, context: &mut ggez::Context) -> GameResult {
-        let cloned_world = self.world.clone();
-        let borrowed_world = cloned_world.borrow();
-        let target_fps = borrowed_world
-            .get_resource("target_fps")
-            .unwrap_or(&ResourcesData::U32(5))
-            .extract_u32()
-            .unwrap_or(1);
-
-        while timer::check_update_time(context, target_fps) {
-            update_locations_system(self.world.clone());
-        }
+        update_locations_system(&self.world);
         Ok(())
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
         graphics::clear(context, self.background_color);
-        draw_birds_system(context, self.world.clone())?;
+        draw_birds_system(context, &self.bird_mesh, &self.world)?;
         graphics::present(context)
     }
 }
