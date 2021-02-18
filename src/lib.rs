@@ -1,8 +1,10 @@
 mod component_names;
+mod resource_names;
 mod systems;
 
 use bbecs::components::point::Point;
 use bbecs::components::Component;
+use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
 use ggez::{
@@ -10,14 +12,13 @@ use ggez::{
     graphics::{self, DrawMode},
     Context, GameResult,
 };
-use graphics::{Color, Mesh, MeshBuilder};
+use graphics::MeshBuilder;
+use resource_names::ResourceNames;
 use systems::draw_birds::draw_birds_system;
 use systems::update_locations::update_locations_system;
 
 pub struct FlockingRustState {
-    background_color: Color,
-    world: World<ComponentNames>,
-    bird_mesh: Mesh,
+    world: World<ComponentNames, ResourceNames>,
 }
 
 impl FlockingRustState {
@@ -27,6 +28,12 @@ impl FlockingRustState {
         let bird_mesh = MeshBuilder::new()
             .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
             .build(context)?;
+
+        world.add_resource(
+            ResourceNames::BackgroundColor,
+            Resource::Color(background_color),
+        );
+        world.add_resource(ResourceNames::BirdMesh, Resource::Mesh(bird_mesh));
 
         world
             .spawn_entity()
@@ -50,11 +57,7 @@ impl FlockingRustState {
                 Component::Point(Point::new(1.0, 1.0)),
             );
 
-        Ok(Self {
-            background_color,
-            world,
-            bird_mesh,
-        })
+        Ok(Self { world })
     }
 }
 
@@ -65,8 +68,15 @@ impl EventHandler for FlockingRustState {
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
-        graphics::clear(context, self.background_color);
-        draw_birds_system(context, &self.bird_mesh, &self.world)?;
+        let background_color = {
+            let resource = self
+                .world
+                .get_resource(&ResourceNames::BackgroundColor)
+                .borrow();
+            *resource.cast_color()
+        };
+        graphics::clear(context, background_color);
+        draw_birds_system(context, &self.world)?;
         graphics::present(context)
     }
 }

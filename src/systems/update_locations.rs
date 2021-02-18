@@ -1,8 +1,9 @@
 use bbecs::world::World;
 
 use crate::component_names::ComponentNames;
+use crate::resource_names::ResourceNames;
 
-pub fn update_locations_system(world: &World<ComponentNames>) {
+pub fn update_locations_system(world: &World<ComponentNames, ResourceNames>) {
     let mut locations = world.query_one(&ComponentNames::Location).borrow_mut();
     let velocities = world.query_one(&ComponentNames::Velocity).borrow();
 
