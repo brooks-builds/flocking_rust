@@ -1,24 +1,22 @@
+mod component_names;
 mod systems;
 
 use bbecs::components::point::Point;
 use bbecs::components::Component;
-use bbecs::resources::ResourcesData;
 use bbecs::world::World;
-use ggez::timer;
+use component_names::ComponentNames;
 use ggez::{
     event::EventHandler,
     graphics::{self, DrawMode},
     Context, GameResult,
 };
 use graphics::{Color, Mesh, MeshBuilder};
-use std::cell::RefCell;
-use std::rc::Rc;
 use systems::draw_birds::draw_birds_system;
 use systems::update_locations::update_locations_system;
 
 pub struct FlockingRustState {
     background_color: Color,
-    world: World,
+    world: World<ComponentNames>,
     bird_mesh: Mesh,
 }
 
@@ -32,13 +30,25 @@ impl FlockingRustState {
 
         world
             .spawn_entity()
-            .with_component("location", Component::Point(Point::new(50.0, 50.0)))
-            .with_component("velocity", Component::Point(Point::new(1.0, 1.0)));
+            .with_component(
+                ComponentNames::Location,
+                Component::Point(Point::new(50.0, 50.0)),
+            )
+            .with_component(
+                ComponentNames::Velocity,
+                Component::Point(Point::new(1.0, 1.0)),
+            );
 
         world
             .spawn_entity()
-            .with_component("location", Component::Point(Point::new(75.0, 150.0)))
-            .with_component("velocity", Component::Point(Point::new(1.0, 1.0)));
+            .with_component(
+                ComponentNames::Location,
+                Component::Point(Point::new(75.0, 150.0)),
+            )
+            .with_component(
+                ComponentNames::Velocity,
+                Component::Point(Point::new(1.0, 1.0)),
+            );
 
         Ok(Self {
             background_color,
@@ -49,7 +59,7 @@ impl FlockingRustState {
 }
 
 impl EventHandler for FlockingRustState {
-    fn update(&mut self, context: &mut ggez::Context) -> GameResult {
+    fn update(&mut self, _context: &mut ggez::Context) -> GameResult {
         update_locations_system(&self.world);
         Ok(())
     }
