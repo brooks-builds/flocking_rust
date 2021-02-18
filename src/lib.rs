@@ -15,6 +15,7 @@ use ggez::{
 use graphics::MeshBuilder;
 use resource_names::ResourceNames;
 use systems::draw_birds::draw_birds_system;
+use systems::handle_arena_edges::handle_arena_edges_system;
 use systems::update_locations::update_locations_system;
 
 pub struct FlockingRustState {
@@ -34,23 +35,17 @@ impl FlockingRustState {
             Resource::Color(background_color),
         );
         world.add_resource(ResourceNames::BirdMesh, Resource::Mesh(bird_mesh));
+        let arena_size = graphics::drawable_size(context);
+        world.add_resource(
+            ResourceNames::ArenaSize,
+            Resource::Point(Point::new(arena_size.0, arena_size.1)),
+        );
 
         world
             .spawn_entity()
             .with_component(
                 ComponentNames::Location,
                 Component::Point(Point::new(50.0, 50.0)),
-            )
-            .with_component(
-                ComponentNames::Velocity,
-                Component::Point(Point::new(1.0, 1.0)),
-            );
-
-        world
-            .spawn_entity()
-            .with_component(
-                ComponentNames::Location,
-                Component::Point(Point::new(75.0, 150.0)),
             )
             .with_component(
                 ComponentNames::Velocity,
@@ -64,6 +59,7 @@ impl FlockingRustState {
 impl EventHandler for FlockingRustState {
     fn update(&mut self, _context: &mut ggez::Context) -> GameResult {
         update_locations_system(&self.world);
+        handle_arena_edges_system(&self.world);
         Ok(())
     }
 

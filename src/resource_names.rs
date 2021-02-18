@@ -2,4 +2,5 @@
 pub enum ResourceNames {
     BackgroundColor,
     BirdMesh,
+    ArenaSize,
 }
