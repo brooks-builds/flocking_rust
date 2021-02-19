@@ -3,4 +3,5 @@ pub enum ResourceNames {
     BackgroundColor,
     BirdMesh,
     ArenaSize,
+    UpdateFps,
 }

@@ -9,3 +9,4 @@ version = "0.1.0"
 [dependencies]
 bbecs = {path = "../bbecs"}
 ggez = "0.5"
+rand = "0.8.3"

@@ -7,6 +7,7 @@ use bbecs::components::Component;
 use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
+use ggez::timer;
 use ggez::{
     event::EventHandler,
     graphics::{self, DrawMode},
@@ -40,26 +41,40 @@ impl FlockingRustState {
             ResourceNames::ArenaSize,
             Resource::Point(Point::new(arena_size.0, arena_size.1)),
         );
+        world.add_resource(ResourceNames::UpdateFps, Resource::U32(60));
 
-        world
-            .spawn_entity()
-            .with_component(
-                ComponentNames::Location,
-                Component::Point(Point::new(50.0, 50.0)),
-            )
-            .with_component(
-                ComponentNames::Velocity,
-                Component::Point(Point::new(1.0, 1.0)),
-            );
+        for _ in 0..25 {
+            world
+                .spawn_entity()
+                .with_component(
+                    ComponentNames::Location,
+                    Component::Point(Point::new(arena_size.0 / 2.0, arena_size.1 / 2.0)),
+                )
+                .with_component(
+                    ComponentNames::Velocity,
+                    Component::Point(Point::new(
+                        (rand::random::<f32>() - 0.5) * 5.0,
+                        (rand::random::<f32>() - 0.5) * 5.0,
+                    )),
+                )
+                .with_component(
+                    ComponentNames::Acceleration,
+                    Component::Point(Point::new(0.0, 0.0)),
+                );
+        }
 
         Ok(Self { world })
     }
 }
 
 impl EventHandler for FlockingRustState {
-    fn update(&mut self, _context: &mut ggez::Context) -> GameResult {
-        update_locations_system(&self.world);
-        handle_arena_edges_system(&self.world);
+    fn update(&mut self, context: &mut ggez::Context) -> GameResult {
+        let borrowed_update_fps = self.world.get_resource(&ResourceNames::UpdateFps).borrow();
+        let update_fps = borrowed_update_fps.cast_u32();
+        while timer::check_update_time(context, update_fps) {
+            handle_arena_edges_system(&self.world);
+            update_locations_system(&self.world);
+        }
         Ok(())
     }
 
