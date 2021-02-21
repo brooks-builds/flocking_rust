@@ -5,7 +5,7 @@ use crate::WorldWrapper;
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
 /// of the birds within range of each other, then accelerating away from each of these birds.
 pub fn avoidance_system(world: &WorldWrapper) {
-    let sight_range = 120.0_f32;
+    let sight_range = 25.0_f32;
     let locations = world.query_one(&crate::component_names::ComponentNames::Location);
     let mut accelerations = world
         .query_one(&crate::component_names::ComponentNames::Acceleration)
@@ -37,6 +37,6 @@ pub fn avoidance_system(world: &WorldWrapper) {
 fn create_avoidance_force(mut force: Point) -> Point {
     force.multiply_scalar(-1.0);
     force.normalize();
-    force.multiply_scalar(0.09);
+    force.multiply_scalar(0.25);
     force
 }

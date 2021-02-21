@@ -1,3 +1,4 @@
+pub mod alignment;
 pub mod avoidance;
 pub mod draw_birds;
 pub mod handle_arena_edges;

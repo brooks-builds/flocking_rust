@@ -16,6 +16,7 @@ use ggez::{
 use graphics::MeshBuilder;
 use rand::random;
 use resource_names::ResourceNames;
+use systems::alignment::alignment_system;
 use systems::avoidance::avoidance_system;
 use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
@@ -48,7 +49,7 @@ impl FlockingRustState {
         world.add_resource(ResourceNames::UpdateFps, Resource::U32(60));
 
         // Spawn the birds
-        for _ in 0..25 {
+        for _ in 0..250 {
             world
                 .spawn_entity()
                 .with_component(
@@ -82,6 +83,7 @@ impl EventHandler for FlockingRustState {
         while timer::check_update_time(context, update_fps) {
             handle_arena_edges_system(&self.world);
             avoidance_system(&self.world);
+            alignment_system(&self.world);
             update_locations_system(&self.world);
         }
         Ok(())
