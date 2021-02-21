@@ -16,7 +16,7 @@ pub fn update_locations_system(world: &World<ComponentNames, ResourceNames>) {
             let velocity = velocities[index].cast_point_mut();
             let acceleration = accelerations[index].cast_point_mut();
 
-            velocity.add(acceleration);
+            *velocity += *acceleration;
             velocity.normalize();
             velocity.multiply_scalar(2.5);
             location.add(velocity);
