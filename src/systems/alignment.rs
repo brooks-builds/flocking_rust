@@ -8,6 +8,12 @@ pub fn alignment_system(world: &WorldWrapper) {
     let mut accelerations = world
         .query_one(&crate::component_names::ComponentNames::Acceleration)
         .borrow_mut();
+    let sight_range = world
+        .get_resource(&crate::resource_names::ResourceNames::SightRange)
+        .borrow()
+        .cast_f32()
+        * 1.5;
+
     locations_wrapper
         .clone()
         .borrow()
@@ -16,7 +22,7 @@ pub fn alignment_system(world: &WorldWrapper) {
         .for_each(|(my_index, my_location)| {
             let my_location = my_location.cast_point();
             let nearby_indexes =
-                get_nearby_indexes(my_location, locations_wrapper.clone().borrow());
+                get_nearby_indexes(my_location, locations_wrapper.clone().borrow(), sight_range);
             let nearby_velocities =
                 get_velocities_by_index(velocities_wrapper.borrow(), nearby_indexes);
             if !nearby_velocities.is_empty() {
@@ -33,6 +39,7 @@ pub fn alignment_system(world: &WorldWrapper) {
 fn get_nearby_indexes(
     my_location: &Point,
     other_locations: std::cell::Ref<'_, std::vec::Vec<bbecs::components::Component>>,
+    sight_range: f32,
 ) -> Vec<usize> {
     other_locations
         .iter()
@@ -43,7 +50,7 @@ fn get_nearby_indexes(
                 return None;
             }
 
-            if my_location.distance_to(other_location) > 100.0 {
+            if my_location.distance_to(other_location) > sight_range {
                 return None;
             }
 

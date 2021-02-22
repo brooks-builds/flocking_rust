@@ -4,4 +4,5 @@ pub enum ResourceNames {
     BirdMesh,
     ArenaSize,
     UpdateFps,
+    SightRange,
 }

@@ -10,7 +10,10 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
     let locations = world.query_one(&ComponentNames::Location).borrow();
     let velocities = world.query_one(&ComponentNames::Velocity).borrow();
     let mut accelerations = world.query_one(&ComponentNames::Acceleration).borrow_mut();
-    let margin = 50.0;
+    let sight_range = world
+        .get_resource(&ResourceNames::SightRange)
+        .borrow()
+        .cast_f32();
 
     locations.iter().enumerate().for_each(|(index, location)| {
         let location = location.cast_point();
@@ -18,7 +21,7 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
         let acceleration = accelerations[index].cast_point_mut();
 
         let mut force = Point::default();
-        if location.x > arena_size.x - margin {
+        if location.x > arena_size.x - sight_range {
             if velocity.y >= 0.0 {
                 // We are going to turn right
                 force = velocity.to_perpendicular_right();
@@ -26,7 +29,7 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
                 // We are going to turn left
                 force = velocity.to_perpendicular_left();
             }
-        } else if location.x < margin {
+        } else if location.x < sight_range {
             if velocity.y >= 0.0 {
                 // We are going to turn left because it will be faster to avoid the wall
                 force = velocity.to_perpendicular_left();
@@ -36,13 +39,13 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
             }
         }
 
-        if location.y < margin {
+        if location.y < sight_range {
             if velocity.x >= 0.0 {
                 force = velocity.to_perpendicular_right();
             } else {
                 force = velocity.to_perpendicular_left();
             }
-        } else if location.y > arena_size.y - margin {
+        } else if location.y > arena_size.y - sight_range {
             if velocity.x >= 0.0 {
                 force = velocity.to_perpendicular_left();
             } else {
