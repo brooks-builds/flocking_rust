@@ -5,4 +5,5 @@ pub enum ResourceNames {
     ArenaSize,
     UpdateFps,
     SightRange,
+    AvoidRange,
 }

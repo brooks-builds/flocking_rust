@@ -25,6 +25,7 @@ use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
 use systems::update_locations::update_locations_system;
 use systems::update_rotations::update_rotations_system;
+use systems::visualize::visualize_ranges_system;
 
 type WorldWrapper = World<ComponentNames, ResourceNames>;
 
@@ -37,6 +38,7 @@ impl FlockingRustState {
         let background_color = graphics::BLACK;
         let mut world = World::new();
         let boid_mesh = create_boid_mesh(context, 25.0)?;
+        let sight_range = 50.0;
 
         world.add_resource(
             ResourceNames::BackgroundColor,
@@ -49,10 +51,14 @@ impl FlockingRustState {
             Resource::Point(Point::new(arena_size.0, arena_size.1)),
         );
         world.add_resource(ResourceNames::UpdateFps, Resource::U32(60));
-        world.add_resource(ResourceNames::SightRange, Resource::F32(50.0));
+        world.add_resource(ResourceNames::SightRange, Resource::F32(sight_range));
+        world.add_resource(
+            ResourceNames::AvoidRange,
+            Resource::F32(sight_range * 0.625),
+        );
 
         // Spawn the birds
-        for _ in 0..1 {
+        for _ in 0..50 {
             world
                 .spawn_entity()
                 .with_component(
@@ -87,8 +93,8 @@ impl EventHandler for FlockingRustState {
         while timer::check_update_time(context, update_fps) {
             handle_arena_edges_system(&self.world);
             avoidance_system(&self.world);
-            alignment_system(&self.world);
-            attraction_system(&self.world);
+            // alignment_system(&self.world);
+            // attraction_system(&self.world);
             update_locations_system(&self.world);
             update_rotations_system(&self.world);
         }
@@ -105,6 +111,7 @@ impl EventHandler for FlockingRustState {
         };
         graphics::clear(context, background_color);
         draw_birds_system(context, &self.world)?;
+        visualize_ranges_system(&self.world, context)?;
         graphics::present(context)
     }
 }

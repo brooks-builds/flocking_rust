@@ -5,11 +5,10 @@ use crate::WorldWrapper;
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
 /// of the birds within range of each other, then accelerating away from each of these birds.
 pub fn avoidance_system(world: &WorldWrapper) {
-    let sight_range = world
-        .get_resource(&crate::resource_names::ResourceNames::SightRange)
+    let avoid_range = world
+        .get_resource(&crate::resource_names::ResourceNames::AvoidRange)
         .borrow()
-        .cast_f32()
-        * 0.005;
+        .cast_f32();
     let locations = world.query_one(&crate::component_names::ComponentNames::Location);
     let mut accelerations = world
         .query_one(&crate::component_names::ComponentNames::Acceleration)
@@ -32,18 +31,25 @@ pub fn avoidance_system(world: &WorldWrapper) {
                     }
                     let other_location = other_location.cast_point();
                     let distance = *my_location - *other_location;
-                    if distance.length() < sight_range {
+                    if my_location.distance_to(other_location) < avoid_range {
                         let acceleration = accelerations[index].cast_point_mut();
-                        acceleration.add(&create_avoidance_force(&distance));
+                        let mut force =
+                            create_avoidance_force(&distance, my_location, other_location);
+                        *acceleration += force;
                     }
                 },
             )
         });
 }
 
-fn create_avoidance_force(velocity: &Point) -> Point {
-    let mut force = velocity.to_perpendicular_right();
+fn create_avoidance_force(distance: &Point, my_location: &Point, other_location: &Point) -> Point {
+    let mut force = distance.clone();
+    // if other_location.x < my_location.x {
+    //     force = velocity.to_perpendicular_right();
+    // } else {
+    //     force = velocity.to_perpendicular_left();
+    // }
     force.normalize();
-    force.multiply_scalar(0.1);
+    force.multiply_scalar(0.5);
     force
 }
