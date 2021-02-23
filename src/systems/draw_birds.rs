@@ -13,12 +13,19 @@ pub fn draw_birds_system(
     let borrowed_mesh = world.get_resource(&ResourceNames::BirdMesh).borrow();
     let mesh = borrowed_mesh.cast_mesh();
     let locations = world.query_one(&ComponentNames::Location).borrow();
-    locations.iter().try_for_each(|component| {
-        let location = component.cast_point();
-        graphics::draw(
-            context,
-            mesh,
-            DrawParam::default().dest(location.to_array()),
-        )
-    })
+    let rotations = world.query_one(&ComponentNames::Rotation).borrow();
+    locations
+        .iter()
+        .enumerate()
+        .try_for_each(|(index, location)| {
+            let location = location.cast_point();
+            let rotation = rotations[index].cast_f32();
+            graphics::draw(
+                context,
+                mesh,
+                DrawParam::default()
+                    .dest(location.to_array())
+                    .rotation(*rotation),
+            )
+        })
 }

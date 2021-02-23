@@ -1,4 +1,5 @@
 mod component_names;
+mod mesh;
 mod resource_names;
 mod systems;
 
@@ -14,6 +15,7 @@ use ggez::{
     Context, GameResult,
 };
 use graphics::MeshBuilder;
+use mesh::create_boid_mesh;
 use rand::random;
 use resource_names::ResourceNames;
 use systems::alignment::alignment_system;
@@ -22,6 +24,7 @@ use systems::avoidance::avoidance_system;
 use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
 use systems::update_locations::update_locations_system;
+use systems::update_rotations::update_rotations_system;
 
 type WorldWrapper = World<ComponentNames, ResourceNames>;
 
@@ -33,15 +36,13 @@ impl FlockingRustState {
     pub fn new(context: &mut Context) -> GameResult<Self> {
         let background_color = graphics::BLACK;
         let mut world = World::new();
-        let bird_mesh = MeshBuilder::new()
-            .circle(DrawMode::fill(), [0.0, 0.0], 5.0, 0.1, graphics::WHITE)
-            .build(context)?;
+        let boid_mesh = create_boid_mesh(context, 25.0)?;
 
         world.add_resource(
             ResourceNames::BackgroundColor,
             Resource::Color(background_color),
         );
-        world.add_resource(ResourceNames::BirdMesh, Resource::Mesh(bird_mesh));
+        world.add_resource(ResourceNames::BirdMesh, Resource::Mesh(boid_mesh));
         let arena_size = graphics::drawable_size(context);
         world.add_resource(
             ResourceNames::ArenaSize,
@@ -51,7 +52,7 @@ impl FlockingRustState {
         world.add_resource(ResourceNames::SightRange, Resource::F32(50.0));
 
         // Spawn the birds
-        for _ in 0..50 {
+        for _ in 0..1 {
             world
                 .spawn_entity()
                 .with_component(
@@ -71,7 +72,8 @@ impl FlockingRustState {
                 .with_component(
                     ComponentNames::Acceleration,
                     Component::Point(Point::new(0.0, 0.0)),
-                );
+                )
+                .with_component(ComponentNames::Rotation, Component::F32(0.0));
         }
 
         Ok(Self { world })
@@ -88,6 +90,7 @@ impl EventHandler for FlockingRustState {
             alignment_system(&self.world);
             attraction_system(&self.world);
             update_locations_system(&self.world);
+            update_rotations_system(&self.world);
         }
         Ok(())
     }

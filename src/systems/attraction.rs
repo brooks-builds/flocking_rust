@@ -39,7 +39,7 @@ fn handle_location(
     let location = location.cast_point();
     let boids_near_me = get_boids_near_me(index, other_locations, sight_range);
     if let Some(average_location_of_other_boids) = calculate_average_locations(boids_near_me) {
-        let mut force = *location - average_location_of_other_boids;
+        let mut force = average_location_of_other_boids - *location;
         let mut accelerations = world
             .query_one(&crate::component_names::ComponentNames::Acceleration)
             .deref()

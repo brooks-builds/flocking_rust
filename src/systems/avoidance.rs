@@ -31,10 +31,10 @@ pub fn avoidance_system(world: &WorldWrapper) {
                         return;
                     }
                     let other_location = other_location.cast_point();
-                    let distance = *other_location - *my_location;
+                    let distance = *my_location - *other_location;
                     if distance.length() < sight_range {
                         let acceleration = accelerations[index].cast_point_mut();
-                        acceleration.add(&create_avoidance_force(velocities[index].cast_point()));
+                        acceleration.add(&create_avoidance_force(&distance));
                     }
                 },
             )

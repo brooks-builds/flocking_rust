@@ -3,4 +3,5 @@ pub enum ComponentNames {
     Location,
     Velocity,
     Acceleration,
+    Rotation,
 }
