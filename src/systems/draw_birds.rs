@@ -11,6 +11,8 @@ pub fn draw_birds_system(
     world: &World<ComponentNames, ResourceNames>,
 ) -> GameResult {
     let borrowed_mesh = world.get_resource(&ResourceNames::BirdMesh).borrow();
+    let wrapped_color = world.get_resource(&ResourceNames::BoidColor).borrow();
+    let color = wrapped_color.cast_color();
     let mesh = borrowed_mesh.cast_mesh();
     let locations = world.query_one(&ComponentNames::Location).borrow();
     let rotations = world.query_one(&ComponentNames::Rotation).borrow();
@@ -25,7 +27,8 @@ pub fn draw_birds_system(
                 mesh,
                 DrawParam::default()
                     .dest(location.to_array())
-                    .rotation(*rotation),
+                    .rotation(*rotation)
+                    .color(*color),
             )
         })
 }

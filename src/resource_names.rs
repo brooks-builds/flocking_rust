@@ -6,4 +6,10 @@ pub enum ResourceNames {
     UpdateFps,
     SightRange,
     AvoidRange,
+    TurningSpeed,
+    AttractionTurningSpeed,
+    BoidColor,
+    ColorChangeRate,
+    ColorChangeSpeed,
+    ClearScreenMesh,
 }

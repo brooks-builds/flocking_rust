@@ -1,6 +1,5 @@
-use std::borrow::BorrowMut;
-use std::cell::{Ref, RefMut};
-use std::ops::{Deref, DerefMut};
+use std::cell::Ref;
+use std::ops::Deref;
 
 use bbecs::components::point::Point;
 use bbecs::components::Component;
@@ -11,9 +10,12 @@ pub fn attraction_system(world: &WorldWrapper) {
     let sight_range = world
         .get_resource(&crate::resource_names::ResourceNames::SightRange)
         .borrow()
-        .cast_f32()
-        * 1.25;
+        .cast_f32();
     let wrapped_locations = world.query_one(&crate::component_names::ComponentNames::Location);
+    let turning_speed = world
+        .get_resource(&crate::resource_names::ResourceNames::AttractionTurningSpeed)
+        .borrow()
+        .cast_f32();
 
     wrapped_locations
         .clone()
@@ -26,6 +28,7 @@ pub fn attraction_system(world: &WorldWrapper) {
                 wrapped_locations.clone().borrow(),
                 sight_range,
                 world,
+                turning_speed,
             )
         });
 }
@@ -35,6 +38,7 @@ fn handle_location(
     other_locations: Ref<Vec<Component>>,
     sight_range: f32,
     world: &WorldWrapper,
+    turning_speed: f32,
 ) {
     let location = location.cast_point();
     let boids_near_me = get_boids_near_me(index, other_locations, sight_range);
@@ -45,7 +49,7 @@ fn handle_location(
             .deref()
             .borrow_mut();
         force.normalize();
-        force.multiply_scalar(0.5);
+        force.multiply_scalar(turning_speed);
 
         *accelerations[index].cast_point_mut() += force;
     }

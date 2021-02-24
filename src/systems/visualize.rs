@@ -1,11 +1,9 @@
-use std::ops::Deref;
-
-use bbecs::world;
 use ggez::graphics::{draw, Color, DrawMode, DrawParam, Mesh, MeshBuilder, WHITE};
 use ggez::{Context, GameResult};
 
 use crate::WorldWrapper;
 
+#[allow(dead_code)]
 pub fn visualize_ranges_system(world: &WorldWrapper, context: &mut Context) -> GameResult {
     let locations = world
         .query_one(&crate::component_names::ComponentNames::Location)

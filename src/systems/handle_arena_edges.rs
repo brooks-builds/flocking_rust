@@ -14,6 +14,10 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
         .get_resource(&ResourceNames::SightRange)
         .borrow()
         .cast_f32();
+    let turning_speed = world
+        .get_resource(&ResourceNames::TurningSpeed)
+        .borrow()
+        .cast_f32();
 
     locations.iter().enumerate().for_each(|(index, location)| {
         let location = location.cast_point();
@@ -53,7 +57,7 @@ pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
             }
         }
         force.normalize();
-        force.multiply_scalar(0.1);
+        force.multiply_scalar(turning_speed);
         acceleration.add(&force);
     });
 }

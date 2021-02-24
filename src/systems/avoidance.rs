@@ -1,5 +1,6 @@
 use bbecs::components::point::Point;
 
+use crate::resource_names::ResourceNames;
 use crate::WorldWrapper;
 
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
@@ -13,9 +14,10 @@ pub fn avoidance_system(world: &WorldWrapper) {
     let mut accelerations = world
         .query_one(&crate::component_names::ComponentNames::Acceleration)
         .borrow_mut();
-    let velocities = world
-        .query_one(&crate::component_names::ComponentNames::Velocity)
-        .borrow_mut();
+    let turning_speed = world
+        .get_resource(&ResourceNames::TurningSpeed)
+        .borrow()
+        .cast_f32();
 
     locations
         .clone()
@@ -33,8 +35,7 @@ pub fn avoidance_system(world: &WorldWrapper) {
                     let distance = *my_location - *other_location;
                     if my_location.distance_to(other_location) < avoid_range {
                         let acceleration = accelerations[index].cast_point_mut();
-                        let mut force =
-                            create_avoidance_force(&distance, my_location, other_location);
+                        let force = create_avoidance_force(distance, turning_speed);
                         *acceleration += force;
                     }
                 },
@@ -42,14 +43,9 @@ pub fn avoidance_system(world: &WorldWrapper) {
         });
 }
 
-fn create_avoidance_force(distance: &Point, my_location: &Point, other_location: &Point) -> Point {
-    let mut force = distance.clone();
-    // if other_location.x < my_location.x {
-    //     force = velocity.to_perpendicular_right();
-    // } else {
-    //     force = velocity.to_perpendicular_left();
-    // }
+fn create_avoidance_force(distance: Point, turning_speed: f32) -> Point {
+    let mut force = distance;
     force.normalize();
-    force.multiply_scalar(0.5);
+    force.multiply_scalar(turning_speed);
     force
 }

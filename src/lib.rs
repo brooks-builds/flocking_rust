@@ -8,24 +8,25 @@ use bbecs::components::Component;
 use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
+use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{
     event::EventHandler,
-    graphics::{self, DrawMode},
+    graphics::{self},
     Context, GameResult,
 };
-use graphics::MeshBuilder;
-use mesh::create_boid_mesh;
+use mesh::{create_boid_mesh, create_clear_mesh};
 use rand::random;
 use resource_names::ResourceNames;
 use systems::alignment::alignment_system;
 use systems::attraction::attraction_system;
 use systems::avoidance::avoidance_system;
+use systems::clear_screen::clear_screen_system;
 use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
+use systems::update_boid_color::update_boid_color_system;
 use systems::update_locations::update_locations_system;
 use systems::update_rotations::update_rotations_system;
-use systems::visualize::visualize_ranges_system;
 
 type WorldWrapper = World<ComponentNames, ResourceNames>;
 
@@ -56,9 +57,21 @@ impl FlockingRustState {
             ResourceNames::AvoidRange,
             Resource::F32(sight_range * 0.625),
         );
+        world.add_resource(ResourceNames::TurningSpeed, Resource::F32(0.5));
+        world.add_resource(ResourceNames::AttractionTurningSpeed, Resource::F32(0.1));
+        world.add_resource(
+            ResourceNames::BoidColor,
+            Resource::Color(Color::new(0.0, 0.0, 0.0, 1.0)),
+        );
+        world.add_resource(ResourceNames::ColorChangeRate, Resource::F32(0.01));
+        world.add_resource(ResourceNames::ColorChangeSpeed, Resource::Usize(5));
+        world.add_resource(
+            ResourceNames::ClearScreenMesh,
+            Resource::Mesh(create_clear_mesh(context)?),
+        );
 
         // Spawn the birds
-        for _ in 0..50 {
+        for _ in 0..100 {
             world
                 .spawn_entity()
                 .with_component(
@@ -91,10 +104,11 @@ impl EventHandler for FlockingRustState {
         let borrowed_update_fps = self.world.get_resource(&ResourceNames::UpdateFps).borrow();
         let update_fps = borrowed_update_fps.cast_u32();
         while timer::check_update_time(context, update_fps) {
+            update_boid_color_system(&self.world, timer::ticks(context));
             handle_arena_edges_system(&self.world);
             avoidance_system(&self.world);
-            // alignment_system(&self.world);
-            // attraction_system(&self.world);
+            alignment_system(&self.world);
+            attraction_system(&self.world);
             update_locations_system(&self.world);
             update_rotations_system(&self.world);
         }
@@ -102,16 +116,17 @@ impl EventHandler for FlockingRustState {
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
-        let background_color = {
-            let resource = self
-                .world
-                .get_resource(&ResourceNames::BackgroundColor)
-                .borrow();
-            *resource.cast_color()
-        };
-        graphics::clear(context, background_color);
+        // let background_color = {
+        //     let resource = self
+        //         .world
+        //         .get_resource(&ResourceNames::BackgroundColor)
+        //         .borrow();
+        //     *resource.cast_color()
+        // };
+        // graphics::clear(context, background_color);
+        clear_screen_system(&self.world, context)?;
         draw_birds_system(context, &self.world)?;
-        visualize_ranges_system(&self.world, context)?;
+        // visualize_ranges_system(&self.world, context)?;
         graphics::present(context)
     }
 }

@@ -1,5 +1,6 @@
 use bbecs::components::point::Point;
 
+use crate::resource_names::ResourceNames;
 use crate::WorldWrapper;
 
 pub fn alignment_system(world: &WorldWrapper) {
@@ -11,8 +12,11 @@ pub fn alignment_system(world: &WorldWrapper) {
     let sight_range = world
         .get_resource(&crate::resource_names::ResourceNames::SightRange)
         .borrow()
-        .cast_f32()
-        * 1.5;
+        .cast_f32();
+    let turning_speed = world
+        .get_resource(&ResourceNames::TurningSpeed)
+        .borrow()
+        .cast_f32();
 
     locations_wrapper
         .clone()
@@ -28,7 +32,7 @@ pub fn alignment_system(world: &WorldWrapper) {
             if !nearby_velocities.is_empty() {
                 let mut average_velocity = calculate_average_velocity(nearby_velocities);
                 average_velocity.normalize();
-                average_velocity.multiply_scalar(0.1);
+                average_velocity.multiply_scalar(turning_speed);
                 accelerations[my_index]
                     .cast_point_mut()
                     .add(&average_velocity);
