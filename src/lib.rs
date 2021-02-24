@@ -8,6 +8,7 @@ use bbecs::components::Component;
 use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
+use ggez::conf::WindowMode;
 use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{
@@ -128,5 +129,9 @@ impl EventHandler for FlockingRustState {
         draw_birds_system(context, &self.world)?;
         // visualize_ranges_system(&self.world, context)?;
         graphics::present(context)
+    }
+
+    fn resize_event(&mut self, context: &mut Context, width: f32, height: f32) {
+        // graphics::set_drawable_size(context, width, height).unwrap();
     }
 }
