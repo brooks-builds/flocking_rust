@@ -9,7 +9,7 @@ use bbecs::resources::resource::Resource;
 use bbecs::world::World;
 use component_names::ComponentNames;
 use ggez::conf::WindowMode;
-use ggez::graphics::Color;
+use ggez::graphics::{drawable_size, Color, Rect};
 use ggez::timer;
 use ggez::{
     event::EventHandler,
@@ -25,6 +25,7 @@ use systems::avoidance::avoidance_system;
 use systems::clear_screen::clear_screen_system;
 use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
+use systems::handle_screen_size_change::handle_screen_size_change_system;
 use systems::update_boid_color::update_boid_color_system;
 use systems::update_locations::update_locations_system;
 use systems::update_rotations::update_rotations_system;
@@ -33,6 +34,7 @@ type WorldWrapper = World<ComponentNames, ResourceNames>;
 
 pub struct FlockingRustState {
     world: WorldWrapper,
+    has_resized: bool,
 }
 
 impl FlockingRustState {
@@ -96,12 +98,16 @@ impl FlockingRustState {
                 .with_component(ComponentNames::Rotation, Component::F32(0.0));
         }
 
-        Ok(Self { world })
+        Ok(Self {
+            world,
+            has_resized: false,
+        })
     }
 }
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, context: &mut ggez::Context) -> GameResult {
+        handle_screen_size_change_system(&mut self.world, context)?;
         let borrowed_update_fps = self.world.get_resource(&ResourceNames::UpdateFps).borrow();
         let update_fps = borrowed_update_fps.cast_u32();
         while timer::check_update_time(context, update_fps) {
@@ -117,14 +123,17 @@ impl EventHandler for FlockingRustState {
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
-        // let background_color = {
-        //     let resource = self
-        //         .world
-        //         .get_resource(&ResourceNames::BackgroundColor)
-        //         .borrow();
-        //     *resource.cast_color()
-        // };
-        // graphics::clear(context, background_color);
+        if self.has_resized {
+            let background_color = {
+                let resource = self
+                    .world
+                    .get_resource(&ResourceNames::BackgroundColor)
+                    .borrow();
+                *resource.cast_color()
+            };
+            graphics::clear(context, background_color);
+            self.has_resized = false;
+        }
         clear_screen_system(&self.world, context)?;
         draw_birds_system(context, &self.world)?;
         // visualize_ranges_system(&self.world, context)?;
@@ -132,6 +141,14 @@ impl EventHandler for FlockingRustState {
     }
 
     fn resize_event(&mut self, context: &mut Context, width: f32, height: f32) {
-        // graphics::set_drawable_size(context, width, height).unwrap();
+        let mut wrapped_screen_size = self
+            .world
+            .get_resource(&ResourceNames::ArenaSize)
+            .borrow_mut();
+        let mut screen_size = wrapped_screen_size.cast_point_mut();
+
+        screen_size.x = width;
+        screen_size.y = height;
+        self.has_resized = true;
     }
 }

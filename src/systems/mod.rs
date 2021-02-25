@@ -4,6 +4,7 @@ pub mod avoidance;
 pub mod clear_screen;
 pub mod draw_birds;
 pub mod handle_arena_edges;
+pub mod handle_screen_size_change;
 pub mod update_boid_color;
 pub mod update_locations;
 pub mod update_rotations;

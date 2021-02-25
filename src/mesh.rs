@@ -17,7 +17,7 @@ pub fn create_boid_mesh(context: &mut Context, boid_size: f32) -> GameResult<Mes
 pub fn create_clear_mesh(context: &mut Context) -> GameResult<Mesh> {
     let screen_size = drawable_size(context);
     let rect = Rect::new(0.0, 0.0, screen_size.0, screen_size.1);
-    let color = Color::new(0.0, 0.0, 0.0, 0.05);
+    let color = Color::new(0.0, 0.0, 0.0, 0.04);
     MeshBuilder::new()
         .rectangle(DrawMode::fill(), rect, color)
         .build(context)
