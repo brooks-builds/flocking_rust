@@ -74,7 +74,7 @@ impl FlockingRustState {
         );
 
         // Spawn the birds
-        for _ in 0..100 {
+        for _ in 0..500 {
             world
                 .spawn_entity()
                 .with_component(
