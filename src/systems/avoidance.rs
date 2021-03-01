@@ -1,11 +1,11 @@
-use bbecs::components::point::Point;
+use bbecs::data_types::point::Point;
+use bbecs::world::World;
 
 use crate::resource_names::ResourceNames;
-use crate::WorldWrapper;
 
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
 /// of the birds within range of each other, then accelerating away from each of these birds.
-pub fn avoidance_system(world: &WorldWrapper) {
+pub fn avoidance_system(world: &World) {
     let avoid_range = world
         .get_resource(&crate::resource_names::ResourceNames::AvoidRange)
         .borrow()

@@ -1,9 +1,11 @@
-use bbecs::components::point::Point;
+use std::path::Components;
+
+use bbecs::data_types::point::Point;
+use bbecs::world::World;
 
 use crate::resource_names::ResourceNames;
-use crate::WorldWrapper;
 
-pub fn alignment_system(world: &WorldWrapper) {
+pub fn alignment_system(world: &World) {
     let locations_wrapper = world.query_one(&crate::component_names::ComponentNames::Location);
     let velocities_wrapper = world.query_one(&crate::component_names::ComponentNames::Velocity);
     let mut accelerations = world
@@ -42,7 +44,7 @@ pub fn alignment_system(world: &WorldWrapper) {
 
 fn get_nearby_indexes(
     my_location: &Point,
-    other_locations: std::cell::Ref<'_, std::vec::Vec<bbecs::components::Component>>,
+    other_locations: std::cell::Ref<'_, Components>,
     sight_range: f32,
 ) -> Vec<usize> {
     other_locations
@@ -64,7 +66,7 @@ fn get_nearby_indexes(
 }
 
 fn get_velocities_by_index(
-    velocities: std::cell::Ref<'_, std::vec::Vec<bbecs::components::Component>>,
+    velocities: std::cell::Ref<'_, Components>,
     indexes: Vec<usize>,
 ) -> Vec<Point> {
     velocities

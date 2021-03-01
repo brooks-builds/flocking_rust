@@ -1,13 +1,11 @@
 use bbecs::resources::resource::Resource;
+use bbecs::world::World;
 use ggez::graphics::{set_screen_coordinates, Rect};
 use ggez::{Context, GameResult};
 
-use crate::{mesh, WorldWrapper};
+use crate::mesh;
 
-pub fn handle_screen_size_change_system(
-    world: &mut WorldWrapper,
-    context: &mut Context,
-) -> GameResult {
+pub fn handle_screen_size_change_system(world: &mut World, context: &mut Context) -> GameResult {
     {
         let clear_mesh = mesh::create_clear_mesh(context)?;
         world.add_resource(

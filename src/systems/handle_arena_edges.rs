@@ -1,10 +1,10 @@
-use bbecs::components::point::Point;
+use bbecs::data_types::point::Point;
 use bbecs::world::World;
 
 use crate::component_names::ComponentNames;
 use crate::resource_names::ResourceNames;
 
-pub fn handle_arena_edges_system(world: &World<ComponentNames, ResourceNames>) {
+pub fn handle_arena_edges_system(world: &World) {
     let borrowed_arena_size = world.get_resource(&ResourceNames::ArenaSize).borrow();
     let arena_size = borrowed_arena_size.cast_point();
     let locations = world.query_one(&ComponentNames::Location).borrow();

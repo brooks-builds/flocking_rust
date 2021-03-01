@@ -3,10 +3,9 @@ mod mesh;
 mod resource_names;
 mod systems;
 
-use bbecs::components::point::Point;
-use bbecs::components::Component;
+use bbecs::data_types::point::Point;
 use bbecs::resources::resource::Resource;
-use bbecs::world::World;
+use bbecs::world::{World, WorldMethods};
 use component_names::ComponentNames;
 use ggez::conf::WindowMode;
 use ggez::graphics::{drawable_size, Color, Rect};
@@ -30,10 +29,8 @@ use systems::update_boid_color::update_boid_color_system;
 use systems::update_locations::update_locations_system;
 use systems::update_rotations::update_rotations_system;
 
-type WorldWrapper = World<ComponentNames, ResourceNames>;
-
 pub struct FlockingRustState {
-    world: WorldWrapper,
+    world: World,
     has_resized: bool,
 }
 
@@ -44,33 +41,27 @@ impl FlockingRustState {
         let boid_mesh = create_boid_mesh(context, 25.0)?;
         let sight_range = 50.0;
 
-        world.add_resource(
-            ResourceNames::BackgroundColor,
-            Resource::Color(background_color),
-        );
-        world.add_resource(ResourceNames::BirdMesh, Resource::Mesh(boid_mesh));
+        world.add_resource(ResourceNames::BackgroundColor.into(), background_color);
+        world.add_resource(ResourceNames::BirdMesh.into(), boid_mesh);
         let arena_size = graphics::drawable_size(context);
         world.add_resource(
-            ResourceNames::ArenaSize,
-            Resource::Point(Point::new(arena_size.0, arena_size.1)),
+            ResourceNames::ArenaSize.into(),
+            Point::new(arena_size.0, arena_size.1),
         );
-        world.add_resource(ResourceNames::UpdateFps, Resource::U32(60));
-        world.add_resource(ResourceNames::SightRange, Resource::F32(sight_range));
+        world.add_resource(ResourceNames::UpdateFps.into(), 60_u32);
+        world.add_resource(ResourceNames::SightRange.into(), sight_range);
+        world.add_resource(ResourceNames::AvoidRange.into(), sight_range * 0.625);
+        world.add_resource(ResourceNames::TurningSpeed.into(), 0.5);
+        world.add_resource(ResourceNames::AttractionTurningSpeed.into(), 0.1);
         world.add_resource(
-            ResourceNames::AvoidRange,
-            Resource::F32(sight_range * 0.625),
+            ResourceNames::BoidColor.into(),
+            Color::new(0.0, 0.0, 0.0, 1.0),
         );
-        world.add_resource(ResourceNames::TurningSpeed, Resource::F32(0.5));
-        world.add_resource(ResourceNames::AttractionTurningSpeed, Resource::F32(0.1));
+        world.add_resource(ResourceNames::ColorChangeRate.into(), 0.01);
+        world.add_resource(ResourceNames::ColorChangeSpeed.into(), 5_usize);
         world.add_resource(
-            ResourceNames::BoidColor,
-            Resource::Color(Color::new(0.0, 0.0, 0.0, 1.0)),
-        );
-        world.add_resource(ResourceNames::ColorChangeRate, Resource::F32(0.01));
-        world.add_resource(ResourceNames::ColorChangeSpeed, Resource::Usize(5));
-        world.add_resource(
-            ResourceNames::ClearScreenMesh,
-            Resource::Mesh(create_clear_mesh(context)?),
+            ResourceNames::ClearScreenMesh.into(),
+            create_clear_mesh(context)?,
         );
 
         // Spawn the birds
@@ -78,24 +69,21 @@ impl FlockingRustState {
             world
                 .spawn_entity()
                 .with_component(
-                    ComponentNames::Location,
-                    Component::Point(Point::new(
+                    ComponentNames::Location.into(),
+                    Point::new(
                         random::<f32>() * arena_size.0,
                         random::<f32>() * arena_size.1,
-                    )),
+                    ),
                 )
                 .with_component(
-                    ComponentNames::Velocity,
-                    Component::Point(Point::new(
+                    ComponentNames::Velocity.into(),
+                    Point::new(
                         (rand::random::<f32>() - 0.5) * 5.0,
                         (rand::random::<f32>() - 0.5) * 5.0,
-                    )),
+                    ),
                 )
-                .with_component(
-                    ComponentNames::Acceleration,
-                    Component::Point(Point::new(0.0, 0.0)),
-                )
-                .with_component(ComponentNames::Rotation, Component::F32(0.0));
+                .with_component(ComponentNames::Acceleration.into(), Point::new(0.0, 0.0))
+                .with_component(ComponentNames::Rotation.into(), 0.0_f32);
         }
 
         Ok(Self {

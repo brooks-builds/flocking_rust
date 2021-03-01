@@ -1,6 +1,6 @@
-use crate::WorldWrapper;
+use bbecs::world::World;
 
-pub fn update_boid_color_system(world: &WorldWrapper, ticks: usize) {
+pub fn update_boid_color_system(world: &World, ticks: usize) {
     let color_change_every = world
         .get_resource(&crate::resource_names::ResourceNames::ColorChangeSpeed)
         .borrow()

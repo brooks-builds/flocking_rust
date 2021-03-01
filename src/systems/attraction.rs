@@ -1,12 +1,11 @@
 use std::cell::Ref;
 use std::ops::Deref;
 
-use bbecs::components::point::Point;
-use bbecs::components::Component;
+use bbecs::components::Components;
+use bbecs::data_types::point::Point;
+use bbecs::world::World;
 
-use crate::WorldWrapper;
-
-pub fn attraction_system(world: &WorldWrapper) {
+pub fn attraction_system(world: &World) {
     let sight_range = world
         .get_resource(&crate::resource_names::ResourceNames::SightRange)
         .borrow()
@@ -34,10 +33,10 @@ pub fn attraction_system(world: &WorldWrapper) {
 }
 
 fn handle_location(
-    (index, location): (usize, &Component),
-    other_locations: Ref<Vec<Component>>,
+    (index, location): (usize, &Components),
+    other_locations: Ref<Components>,
     sight_range: f32,
-    world: &WorldWrapper,
+    world: &World,
     turning_speed: f32,
 ) {
     let location = location.cast_point();
@@ -55,11 +54,7 @@ fn handle_location(
     }
 }
 
-fn get_boids_near_me(
-    index: usize,
-    all_locations: Ref<Vec<Component>>,
-    sight_range: f32,
-) -> Vec<Point> {
+fn get_boids_near_me(index: usize, all_locations: Ref<Components>, sight_range: f32) -> Vec<Point> {
     let my_location = all_locations[index].cast_point();
     all_locations.iter().enumerate().fold(
         vec![],

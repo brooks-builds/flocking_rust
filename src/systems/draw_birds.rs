@@ -6,10 +6,7 @@ use crate::component_names::ComponentNames;
 use crate::resource_names::ResourceNames;
 
 /// Query for the locations and then draw them out using GGEZ's draw method
-pub fn draw_birds_system(
-    context: &mut Context,
-    world: &World<ComponentNames, ResourceNames>,
-) -> GameResult {
+pub fn draw_birds_system(context: &mut Context, world: &World) -> GameResult {
     let borrowed_mesh = world.get_resource(&ResourceNames::BirdMesh).borrow();
     let wrapped_color = world.get_resource(&ResourceNames::BoidColor).borrow();
     let color = wrapped_color.cast_color();
