@@ -41,49 +41,57 @@ impl FlockingRustState {
         let boid_mesh = create_boid_mesh(context, 25.0)?;
         let sight_range = 50.0;
 
-        world.add_resource(ResourceNames::BackgroundColor.into(), background_color);
-        world.add_resource(ResourceNames::BirdMesh.into(), boid_mesh);
+        world.register(
+            ComponentNames::Acceleration,
+            bbecs::components::Component::Point,
+        );
+        world.register(
+            ComponentNames::Location,
+            bbecs::components::Component::Point,
+        );
+        world.register(ComponentNames::Rotation, bbecs::components::Component::F32);
+        world.register(
+            ComponentNames::Velocity,
+            bbecs::components::Component::Point,
+        );
+
+        world.add_resource(ResourceNames::BackgroundColor, background_color);
+        world.add_resource(ResourceNames::BirdMesh, boid_mesh);
         let arena_size = graphics::drawable_size(context);
         world.add_resource(
-            ResourceNames::ArenaSize.into(),
+            ResourceNames::ArenaSize,
             Point::new(arena_size.0, arena_size.1),
         );
-        world.add_resource(ResourceNames::UpdateFps.into(), 60_u32);
-        world.add_resource(ResourceNames::SightRange.into(), sight_range);
-        world.add_resource(ResourceNames::AvoidRange.into(), sight_range * 0.625);
-        world.add_resource(ResourceNames::TurningSpeed.into(), 0.5);
-        world.add_resource(ResourceNames::AttractionTurningSpeed.into(), 0.1);
-        world.add_resource(
-            ResourceNames::BoidColor.into(),
-            Color::new(0.0, 0.0, 0.0, 1.0),
-        );
-        world.add_resource(ResourceNames::ColorChangeRate.into(), 0.01);
-        world.add_resource(ResourceNames::ColorChangeSpeed.into(), 5_usize);
-        world.add_resource(
-            ResourceNames::ClearScreenMesh.into(),
-            create_clear_mesh(context)?,
-        );
+        world.add_resource(ResourceNames::UpdateFps, 60_u32);
+        world.add_resource(ResourceNames::SightRange, sight_range);
+        world.add_resource(ResourceNames::AvoidRange, sight_range * 0.625);
+        world.add_resource(ResourceNames::TurningSpeed, 0.5);
+        world.add_resource(ResourceNames::AttractionTurningSpeed, 0.1);
+        world.add_resource(ResourceNames::BoidColor, Color::new(0.0, 0.0, 0.0, 1.0));
+        world.add_resource(ResourceNames::ColorChangeRate, 0.01);
+        world.add_resource(ResourceNames::ColorChangeSpeed, 5_usize);
+        world.add_resource(ResourceNames::ClearScreenMesh, create_clear_mesh(context)?);
 
         // Spawn the birds
         for _ in 0..500 {
             world
                 .spawn_entity()
                 .with_component(
-                    ComponentNames::Location.into(),
+                    ComponentNames::Location,
                     Point::new(
                         random::<f32>() * arena_size.0,
                         random::<f32>() * arena_size.1,
                     ),
                 )
                 .with_component(
-                    ComponentNames::Velocity.into(),
+                    ComponentNames::Velocity,
                     Point::new(
                         (rand::random::<f32>() - 0.5) * 5.0,
                         (rand::random::<f32>() - 0.5) * 5.0,
                     ),
                 )
-                .with_component(ComponentNames::Acceleration.into(), Point::new(0.0, 0.0))
-                .with_component(ComponentNames::Rotation.into(), 0.0_f32);
+                .with_component(ComponentNames::Acceleration, Point::new(0.0, 0.0))
+                .with_component(ComponentNames::Rotation, 0.0_f32);
         }
 
         Ok(Self {
@@ -95,6 +103,7 @@ impl FlockingRustState {
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, context: &mut ggez::Context) -> GameResult {
+        // todo check the systems one by one and make sure that they are working
         handle_screen_size_change_system(&mut self.world, context)?;
         let borrowed_update_fps = self.world.get_resource(&ResourceNames::UpdateFps).borrow();
         let update_fps = borrowed_update_fps.cast_u32();
