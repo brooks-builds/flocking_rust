@@ -103,12 +103,12 @@ impl FlockingRustState {
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, context: &mut ggez::Context) -> GameResult {
-        // todo check the systems one by one and make sure that they are working
         handle_screen_size_change_system(&mut self.world, context)?;
-        let borrowed_update_fps = self.world.get_resource(&ResourceNames::UpdateFps).borrow();
-        let update_fps = borrowed_update_fps.cast_u32();
-        while timer::check_update_time(context, update_fps) {
-            update_boid_color_system(&self.world, timer::ticks(context));
+        let update_fps: &u32 = self
+            .world
+            .get_resource::<ResourceNames>(ResourceNames::UpdateFps);
+        while timer::check_update_time(context, *update_fps) {
+            update_boid_color_system(&mut self.world, timer::ticks(context));
             handle_arena_edges_system(&self.world);
             avoidance_system(&self.world);
             alignment_system(&self.world);
@@ -121,14 +121,10 @@ impl EventHandler for FlockingRustState {
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
         if self.has_resized {
-            let background_color = {
-                let resource = self
-                    .world
-                    .get_resource(&ResourceNames::BackgroundColor)
-                    .borrow();
-                *resource.cast_color()
-            };
-            graphics::clear(context, background_color);
+            let background_color: &Color = self
+                .world
+                .get_resource::<ResourceNames>(ResourceNames::BackgroundColor);
+            graphics::clear(context, *background_color);
             self.has_resized = false;
         }
         clear_screen_system(&self.world, context)?;
@@ -138,11 +134,9 @@ impl EventHandler for FlockingRustState {
     }
 
     fn resize_event(&mut self, context: &mut Context, width: f32, height: f32) {
-        let mut wrapped_screen_size = self
+        let mut screen_size: &mut Point = self
             .world
-            .get_resource(&ResourceNames::ArenaSize)
-            .borrow_mut();
-        let mut screen_size = wrapped_screen_size.cast_point_mut();
+            .get_resource_mut::<ResourceNames>(ResourceNames::ArenaSize);
 
         screen_size.x = width;
         screen_size.y = height;

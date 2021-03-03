@@ -32,3 +32,22 @@ impl Into<String> for ResourceNames {
         }
     }
 }
+
+impl Into<&'static str> for ResourceNames {
+    fn into(self) -> &'static str {
+        match self {
+            ResourceNames::BackgroundColor => "BackgroundColor",
+            ResourceNames::BirdMesh => "BirdMesh",
+            ResourceNames::ArenaSize => "ArenaSize",
+            ResourceNames::UpdateFps => "UpdateFps",
+            ResourceNames::SightRange => "SightRange",
+            ResourceNames::AvoidRange => "AvoidRange",
+            ResourceNames::TurningSpeed => "TurningSpeed",
+            ResourceNames::AttractionTurningSpeed => "AttractionTurningSpeed",
+            ResourceNames::BoidColor => "BoidColor",
+            ResourceNames::ColorChangeRate => "ColorChangeRate",
+            ResourceNames::ColorChangeSpeed => "ColorChangeSpeed",
+            ResourceNames::ClearScreenMesh => "ClearScreenMesh",
+        }
+    }
+}
