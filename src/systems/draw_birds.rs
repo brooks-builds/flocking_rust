@@ -1,4 +1,7 @@
-use bbecs::world::World;
+use bbecs::components::CastComponents;
+use bbecs::data_types::point::Point;
+use bbecs::world::{World, WorldMethods};
+use ggez::graphics::{Color, Mesh};
 use ggez::{graphics, Context, GameResult};
 use graphics::DrawParam;
 
@@ -7,24 +10,27 @@ use crate::resource_names::ResourceNames;
 
 /// Query for the locations and then draw them out using GGEZ's draw method
 pub fn draw_birds_system(context: &mut Context, world: &World) -> GameResult {
-    let borrowed_mesh = world.get_resource(&ResourceNames::BirdMesh).borrow();
-    let wrapped_color = world.get_resource(&ResourceNames::BoidColor).borrow();
-    let color = wrapped_color.cast_color();
-    let mesh = borrowed_mesh.cast_mesh();
-    let locations = world.query_one(&ComponentNames::Location).borrow();
-    let rotations = world.query_one(&ComponentNames::Rotation).borrow();
+    let mesh: &Mesh = world.get_resource(ResourceNames::BirdMesh);
+    let color: &Color = world.get_resource(ResourceNames::BoidColor);
+    let wrapped_locations = world
+        .query_one::<ComponentNames>(ComponentNames::Location)
+        .borrow();
+    let locations: &Vec<Point> = wrapped_locations.cast();
+    let wrapped_rotations = world
+        .query_one::<ComponentNames>(ComponentNames::Rotation)
+        .borrow();
+    let rotations: &Vec<f32> = wrapped_rotations.cast();
     locations
         .iter()
         .enumerate()
         .try_for_each(|(index, location)| {
-            let location = location.cast_point();
-            let rotation = rotations[index].cast_f32();
+            let rotation = rotations[index];
             graphics::draw(
                 context,
                 mesh,
                 DrawParam::default()
                     .dest(location.to_array())
-                    .rotation(*rotation)
+                    .rotation(rotation)
                     .color(*color),
             )
         })

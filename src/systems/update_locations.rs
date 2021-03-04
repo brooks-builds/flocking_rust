@@ -1,25 +1,28 @@
+use bbecs::components::CastComponents;
+use bbecs::data_types::point::Point;
 use bbecs::world::World;
 
 use crate::component_names::ComponentNames;
-use crate::resource_names::ResourceNames;
 
 pub fn update_locations_system(world: &World) {
-    let mut locations = world.query_one(&ComponentNames::Location).borrow_mut();
-    let mut velocities = world.query_one(&ComponentNames::Velocity).borrow_mut();
-    let mut accelerations = world.query_one(&ComponentNames::Acceleration).borrow_mut();
+    let mut wrapped_locations = world.query_one(ComponentNames::Location).borrow_mut();
+    let locations = wrapped_locations.cast_mut();
+    let mut wrapped_velocities = world.query_one(ComponentNames::Velocity).borrow_mut();
+    let velocities: &mut Vec<Point> = wrapped_velocities.cast_mut();
+    let mut wrapped_accelerations = world.query_one(ComponentNames::Acceleration).borrow_mut();
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
 
     locations
         .iter_mut()
         .enumerate()
-        .for_each(|(index, location_component)| {
-            let location = location_component.cast_point_mut();
-            let velocity = velocities[index].cast_point_mut();
-            let acceleration = accelerations[index].cast_point_mut();
+        .for_each(|(index, location): (usize, &mut Point)| {
+            let velocity = &mut velocities[index];
+            let acceleration = &mut accelerations[index];
 
             *velocity += *acceleration;
             velocity.normalize();
             velocity.multiply_scalar(2.5);
-            location.add(velocity);
+            location.add(&velocity);
             acceleration.multiply_scalar(0.0);
         })
 }

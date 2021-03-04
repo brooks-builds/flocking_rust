@@ -4,11 +4,9 @@ mod resource_names;
 mod systems;
 
 use bbecs::data_types::point::Point;
-use bbecs::resources::resource::Resource;
 use bbecs::world::{World, WorldMethods};
 use component_names::ComponentNames;
-use ggez::conf::WindowMode;
-use ggez::graphics::{drawable_size, Color, Rect};
+use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{
     event::EventHandler,
@@ -107,7 +105,8 @@ impl EventHandler for FlockingRustState {
         let update_fps: &u32 = self
             .world
             .get_resource::<ResourceNames>(ResourceNames::UpdateFps);
-        while timer::check_update_time(context, *update_fps) {
+        let update_fps = update_fps.clone();
+        while timer::check_update_time(context, update_fps) {
             update_boid_color_system(&mut self.world, timer::ticks(context));
             handle_arena_edges_system(&self.world);
             avoidance_system(&self.world);
@@ -133,7 +132,7 @@ impl EventHandler for FlockingRustState {
         graphics::present(context)
     }
 
-    fn resize_event(&mut self, context: &mut Context, width: f32, height: f32) {
+    fn resize_event(&mut self, _context: &mut Context, width: f32, height: f32) {
         let mut screen_size: &mut Point = self
             .world
             .get_resource_mut::<ResourceNames>(ResourceNames::ArenaSize);

@@ -7,10 +7,10 @@ use crate::resource_names::ResourceNames;
 pub fn alignment_system(world: &World) {
     let locations_wrapper = world.query_one(crate::component_names::ComponentNames::Location);
     let velocities_wrapper = world.query_one(crate::component_names::ComponentNames::Velocity);
-    let mut accelerations: &mut Vec<Point> = world
+    let mut wrapped_accelerations = world
         .query_one(crate::component_names::ComponentNames::Acceleration)
-        .borrow_mut()
-        .cast_mut();
+        .borrow_mut();
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
     let sight_range: &f32 =
         world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange);
     let turning_speed: &f32 = world.get_resource::<ResourceNames>(ResourceNames::TurningSpeed);

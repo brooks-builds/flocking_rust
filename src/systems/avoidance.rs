@@ -1,45 +1,46 @@
+use bbecs::components::CastComponents;
 use bbecs::data_types::point::Point;
-use bbecs::world::World;
+use bbecs::world::{World, WorldMethods};
 
 use crate::resource_names::ResourceNames;
 
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
 /// of the birds within range of each other, then accelerating away from each of these birds.
 pub fn avoidance_system(world: &World) {
-    let avoid_range = world
-        .get_resource(&crate::resource_names::ResourceNames::AvoidRange)
-        .borrow()
-        .cast_f32();
-    let locations = world.query_one(&crate::component_names::ComponentNames::Location);
-    let mut accelerations = world
-        .query_one(&crate::component_names::ComponentNames::Acceleration)
+    let avoid_range: &f32 = world.get_resource(crate::resource_names::ResourceNames::AvoidRange);
+    let locations = world.query_one(crate::component_names::ComponentNames::Location);
+    let mut wrapped_accelerations = world
+        .query_one(crate::component_names::ComponentNames::Acceleration)
         .borrow_mut();
-    let turning_speed = world
-        .get_resource(&ResourceNames::TurningSpeed)
-        .borrow()
-        .cast_f32();
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
+    let turning_speed: &f32 = world.get_resource(ResourceNames::TurningSpeed);
 
     locations
         .clone()
         .borrow()
+        .cast()
         .iter()
         .enumerate()
-        .for_each(|(index, location)| {
-            let my_location = location.cast_point();
-            locations.clone().borrow().iter().enumerate().for_each(
-                |(other_index, other_location)| {
+        .for_each(|(index, location): (usize, &Point)| {
+            let my_location = location;
+            locations
+                .clone()
+                .borrow()
+                .cast()
+                .iter()
+                .enumerate()
+                .for_each(|(other_index, other_location): (usize, &Point)| {
                     if index == other_index {
                         return;
                     }
-                    let other_location = other_location.cast_point();
+                    let other_location = other_location;
                     let distance = *my_location - *other_location;
-                    if my_location.distance_to(other_location) < avoid_range {
-                        let acceleration = accelerations[index].cast_point_mut();
-                        let force = create_avoidance_force(distance, turning_speed);
+                    if my_location.distance_to(other_location) < *avoid_range {
+                        let acceleration = &mut accelerations[index];
+                        let force = create_avoidance_force(distance, *turning_speed);
                         *acceleration += force;
                     }
-                },
-            )
+                })
         });
 }
 

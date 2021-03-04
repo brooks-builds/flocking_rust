@@ -41,10 +41,10 @@ fn handle_location(
     let boids_near_me = get_boids_near_me(index, other_locations.cast(), sight_range);
     if let Some(average_location_of_other_boids) = calculate_average_locations(boids_near_me) {
         let mut force = average_location_of_other_boids - *location;
-        let mut accelerations: &mut Vec<Point> = world
+        let mut wrapped_accelerations = world
             .query_one(crate::component_names::ComponentNames::Acceleration)
-            .borrow_mut()
-            .cast_mut();
+            .borrow_mut();
+        let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
         force.normalize();
         force.multiply_scalar(turning_speed);
 
