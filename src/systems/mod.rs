@@ -1,7 +1,6 @@
 pub mod alignment;
 pub mod attraction;
 pub mod avoidance;
-pub mod clear_screen;
 pub mod draw_birds;
 pub mod handle_arena_edges;
 pub mod handle_screen_size_change;

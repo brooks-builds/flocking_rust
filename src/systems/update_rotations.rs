@@ -1,16 +1,20 @@
-use crate::component_names::ComponentNames;
-use crate::WorldWrapper;
+use bbecs::components::CastComponents;
+use bbecs::data_types::point::Point;
+use bbecs::world::World;
 
-pub fn update_rotations_system(world: &WorldWrapper) {
-    let mut rotations = world.query_one(&ComponentNames::Rotation).borrow_mut();
-    let velocities = world.query_one(&ComponentNames::Velocity).borrow();
+use crate::component_names::ComponentNames;
+
+pub fn update_rotations_system(world: &World) {
+    let mut wrapped_rotations = world.query_one(ComponentNames::Rotation).borrow_mut();
+    let rotations: &mut Vec<f32> = wrapped_rotations.cast_mut();
+    let wrapped_velocities = world.query_one(ComponentNames::Velocity).borrow();
+    let velocities: &Vec<Point> = wrapped_velocities.cast();
 
     rotations
         .iter_mut()
         .enumerate()
         .for_each(|(index, rotation)| {
-            let rotation = rotation.cast_f32_mut();
-            let velocity = velocities[index].cast_point();
+            let velocity = velocities[index];
 
             *rotation = velocity.rotation();
         });

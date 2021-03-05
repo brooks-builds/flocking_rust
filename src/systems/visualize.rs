@@ -1,27 +1,26 @@
+use bbecs::components::CastComponents;
+use bbecs::data_types::point::Point;
+use bbecs::world::{World, WorldMethods};
 use ggez::graphics::{draw, Color, DrawMode, DrawParam, Mesh, MeshBuilder, WHITE};
 use ggez::{Context, GameResult};
 
-use crate::WorldWrapper;
+use crate::resource_names::ResourceNames;
 
 #[allow(dead_code)]
-pub fn visualize_ranges_system(world: &WorldWrapper, context: &mut Context) -> GameResult {
-    let locations = world
-        .query_one(&crate::component_names::ComponentNames::Location)
+pub fn visualize_ranges_system(world: &World, context: &mut Context) -> GameResult {
+    let wrapped_locations = world
+        .query_one(crate::component_names::ComponentNames::Location)
         .borrow();
-    let sight_range = world
-        .get_resource(&crate::ResourceNames::SightRange)
-        .borrow()
-        .cast_f32();
-    let avoidance_range = world
-        .get_resource(&crate::resource_names::ResourceNames::AvoidRange)
-        .borrow()
-        .cast_f32();
-    let location = locations[0].cast_point().to_array();
+    let locations: &Vec<Point> = wrapped_locations.cast();
+    let sight_range: &f32 = world.get_resource::<ResourceNames>(crate::ResourceNames::SightRange);
+    let avoidance_range: &f32 =
+        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::AvoidRange);
+    let location = locations[0].to_array();
 
-    let sight_range_mesh = create_range_mesh(context, sight_range, WHITE, location)?;
+    let sight_range_mesh = create_range_mesh(context, *sight_range, WHITE, location)?;
     let avoid_range_mesh = create_range_mesh(
         context,
-        avoidance_range,
+        *avoidance_range,
         Color::new(1.0, 0.0, 0.0, 1.0),
         location,
     )?;

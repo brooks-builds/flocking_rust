@@ -1,73 +1,66 @@
 use std::cell::Ref;
-use std::ops::Deref;
 
-use bbecs::components::point::Point;
-use bbecs::components::Component;
+use bbecs::components::{CastComponents, Components};
+use bbecs::data_types::point::Point;
+use bbecs::world::{World, WorldMethods};
 
-use crate::WorldWrapper;
+use crate::resource_names::ResourceNames;
 
-pub fn attraction_system(world: &WorldWrapper) {
-    let sight_range = world
-        .get_resource(&crate::resource_names::ResourceNames::SightRange)
-        .borrow()
-        .cast_f32();
-    let wrapped_locations = world.query_one(&crate::component_names::ComponentNames::Location);
-    let turning_speed = world
-        .get_resource(&crate::resource_names::ResourceNames::AttractionTurningSpeed)
-        .borrow()
-        .cast_f32();
+pub fn attraction_system(world: &World) {
+    let sight_range: &f32 =
+        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange);
+    let wrapped_locations = world.query_one(crate::component_names::ComponentNames::Location);
+    let turning_speed: &f32 = world.get_resource::<ResourceNames>(
+        crate::resource_names::ResourceNames::AttractionTurningSpeed,
+    );
 
     wrapped_locations
         .clone()
         .borrow()
+        .cast()
         .iter()
         .enumerate()
-        .for_each(|location| {
+        .for_each(|location: (_, &Point)| {
             handle_location(
                 location,
                 wrapped_locations.clone().borrow(),
-                sight_range,
+                *sight_range,
                 world,
-                turning_speed,
+                *turning_speed,
             )
         });
 }
 
 fn handle_location(
-    (index, location): (usize, &Component),
-    other_locations: Ref<Vec<Component>>,
+    (index, location): (usize, &Point),
+    other_locations: Ref<Components>,
     sight_range: f32,
-    world: &WorldWrapper,
+    world: &World,
     turning_speed: f32,
 ) {
-    let location = location.cast_point();
-    let boids_near_me = get_boids_near_me(index, other_locations, sight_range);
+    let boids_near_me = get_boids_near_me(index, other_locations.cast(), sight_range);
     if let Some(average_location_of_other_boids) = calculate_average_locations(boids_near_me) {
         let mut force = average_location_of_other_boids - *location;
-        let mut accelerations = world
-            .query_one(&crate::component_names::ComponentNames::Acceleration)
-            .deref()
+        let mut wrapped_accelerations = world
+            .query_one(crate::component_names::ComponentNames::Acceleration)
             .borrow_mut();
+        let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
         force.normalize();
         force.multiply_scalar(turning_speed);
 
-        *accelerations[index].cast_point_mut() += force;
+        accelerations[index] += force;
     }
 }
 
-fn get_boids_near_me(
-    index: usize,
-    all_locations: Ref<Vec<Component>>,
-    sight_range: f32,
-) -> Vec<Point> {
-    let my_location = all_locations[index].cast_point();
+fn get_boids_near_me(index: usize, all_locations: &[Point], sight_range: f32) -> Vec<Point> {
+    let my_location = all_locations[index];
     all_locations.iter().enumerate().fold(
         vec![],
         |mut boids_near_me, (other_index, wrapped_other_location)| {
             if index == other_index {
                 boids_near_me
             } else {
-                let other_location = wrapped_other_location.cast_point();
+                let other_location = wrapped_other_location;
                 if my_location.distance_to(other_location) <= sight_range {
                     boids_near_me.push(*other_location);
                 }
