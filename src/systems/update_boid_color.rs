@@ -8,7 +8,7 @@ pub fn update_boid_color_system(world: &mut World, ticks: usize) {
         world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::ColorChangeSpeed);
     let color_change_rate: &f32 =
         world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::ColorChangeRate);
-    let color_change_rate = color_change_rate.clone();
+    let color_change_rate = *color_change_rate;
 
     if ticks % color_change_every == 0 {
         let mut boid_color: &mut Color = world

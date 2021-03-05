@@ -19,7 +19,6 @@ use resource_names::ResourceNames;
 use systems::alignment::alignment_system;
 use systems::attraction::attraction_system;
 use systems::avoidance::avoidance_system;
-use systems::clear_screen::clear_screen_system;
 use systems::draw_birds::draw_birds_system;
 use systems::handle_arena_edges::handle_arena_edges_system;
 use systems::handle_screen_size_change::handle_screen_size_change_system;
@@ -71,7 +70,7 @@ impl FlockingRustState {
         world.add_resource(ResourceNames::ClearScreenMesh, create_clear_mesh(context)?);
 
         // Spawn the birds
-        for _ in 0..500 {
+        for _ in 0..100 {
             world
                 .spawn_entity()
                 .with_component(
@@ -101,11 +100,11 @@ impl FlockingRustState {
 
 impl EventHandler for FlockingRustState {
     fn update(&mut self, context: &mut ggez::Context) -> GameResult {
-        handle_screen_size_change_system(&mut self.world, context)?;
+        handle_screen_size_change_system(&mut self.world, context, &mut self.has_resized)?;
         let update_fps: &u32 = self
             .world
             .get_resource::<ResourceNames>(ResourceNames::UpdateFps);
-        let update_fps = update_fps.clone();
+        let update_fps = *update_fps;
         while timer::check_update_time(context, update_fps) {
             update_boid_color_system(&mut self.world, timer::ticks(context));
             handle_arena_edges_system(&self.world);
@@ -119,14 +118,10 @@ impl EventHandler for FlockingRustState {
     }
 
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
-        if self.has_resized {
-            let background_color: &Color = self
-                .world
-                .get_resource::<ResourceNames>(ResourceNames::BackgroundColor);
-            graphics::clear(context, *background_color);
-            self.has_resized = false;
-        }
-        clear_screen_system(&self.world, context)?;
+        let background_color: &Color = self
+            .world
+            .get_resource::<ResourceNames>(ResourceNames::BackgroundColor);
+        graphics::clear(context, *background_color);
         draw_birds_system(context, &self.world)?;
         // visualize_ranges_system(&self.world, context)?;
         graphics::present(context)

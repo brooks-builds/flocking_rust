@@ -40,7 +40,7 @@ pub fn alignment_system(world: &World) {
 
 fn get_nearby_indexes(
     my_location: &Point,
-    other_locations: &Vec<Point>,
+    other_locations: &[Point],
     sight_range: f32,
 ) -> Vec<usize> {
     other_locations
@@ -61,7 +61,7 @@ fn get_nearby_indexes(
         .collect()
 }
 
-fn get_velocities_by_index(velocities: &Vec<Point>, indexes: Vec<usize>) -> Vec<Point> {
+fn get_velocities_by_index(velocities: &[Point], indexes: Vec<usize>) -> Vec<Point> {
     velocities
         .iter()
         .enumerate()

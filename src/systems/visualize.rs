@@ -6,6 +6,7 @@ use ggez::{Context, GameResult};
 
 use crate::resource_names::ResourceNames;
 
+#[allow(dead_code)]
 pub fn visualize_ranges_system(world: &World, context: &mut Context) -> GameResult {
     let wrapped_locations = world
         .query_one(crate::component_names::ComponentNames::Location)

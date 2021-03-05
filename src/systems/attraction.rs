@@ -52,7 +52,7 @@ fn handle_location(
     }
 }
 
-fn get_boids_near_me(index: usize, all_locations: &Vec<Point>, sight_range: f32) -> Vec<Point> {
+fn get_boids_near_me(index: usize, all_locations: &[Point], sight_range: f32) -> Vec<Point> {
     let my_location = all_locations[index];
     all_locations.iter().enumerate().fold(
         vec![],
