@@ -7,17 +7,21 @@ use bbecs::world::{World, WorldMethods};
 use crate::resource_names::ResourceNames;
 
 pub fn attraction_system(world: &World) {
-    let sight_range: &f32 =
-        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange);
-    let wrapped_locations = world.query_one(crate::component_names::ComponentNames::Location);
-    let turning_speed: &f32 = world.get_resource::<ResourceNames>(
-        crate::resource_names::ResourceNames::AttractionTurningSpeed,
-    );
+    let sight_range: &f32 = world
+        .get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange)
+        .unwrap();
+    let wrapped_locations = world
+        .query_one(crate::component_names::ComponentNames::Location)
+        .unwrap();
+    let turning_speed: &f32 = world
+        .get_resource::<ResourceNames>(crate::resource_names::ResourceNames::AttractionTurningSpeed)
+        .unwrap();
 
     wrapped_locations
         .clone()
         .borrow()
         .cast()
+        .unwrap()
         .iter()
         .enumerate()
         .for_each(|location: (_, &Point)| {
@@ -38,13 +42,14 @@ fn handle_location(
     world: &World,
     turning_speed: f32,
 ) {
-    let boids_near_me = get_boids_near_me(index, other_locations.cast(), sight_range);
+    let boids_near_me = get_boids_near_me(index, other_locations.cast().unwrap(), sight_range);
     if let Some(average_location_of_other_boids) = calculate_average_locations(boids_near_me) {
         let mut force = average_location_of_other_boids - *location;
         let mut wrapped_accelerations = world
             .query_one(crate::component_names::ComponentNames::Acceleration)
+            .unwrap()
             .borrow_mut();
-        let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
+        let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut().unwrap();
         force.normalize();
         force.multiply_scalar(turning_speed);
 

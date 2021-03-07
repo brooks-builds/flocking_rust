@@ -6,15 +6,22 @@ use crate::component_names::ComponentNames;
 use crate::resource_names::ResourceNames;
 
 pub fn handle_arena_edges_system(world: &World) {
-    let arena_size: &Point = world.get_resource(ResourceNames::ArenaSize);
-    let wrapped_locations = world.query_one(ComponentNames::Location).borrow();
-    let locations: &Vec<Point> = wrapped_locations.cast();
-    let wrapped_velocities = world.query_one(ComponentNames::Velocity).borrow();
-    let velocities: &Vec<Point> = wrapped_velocities.cast();
-    let mut wrapped_accelerations = world.query_one(ComponentNames::Acceleration).borrow_mut();
-    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
-    let sight_range: &f32 = world.get_resource::<ResourceNames>(ResourceNames::SightRange);
-    let turning_speed: &f32 = world.get_resource::<ResourceNames>(ResourceNames::TurningSpeed);
+    let arena_size: &Point = world.get_resource(ResourceNames::ArenaSize).unwrap();
+    let wrapped_locations = world.query_one(ComponentNames::Location).unwrap().borrow();
+    let locations: &Vec<Point> = wrapped_locations.cast().unwrap();
+    let wrapped_velocities = world.query_one(ComponentNames::Velocity).unwrap().borrow();
+    let velocities: &Vec<Point> = wrapped_velocities.cast().unwrap();
+    let mut wrapped_accelerations = world
+        .query_one(ComponentNames::Acceleration)
+        .unwrap()
+        .borrow_mut();
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut().unwrap();
+    let sight_range: &f32 = world
+        .get_resource::<ResourceNames>(ResourceNames::SightRange)
+        .unwrap();
+    let turning_speed: &f32 = world
+        .get_resource::<ResourceNames>(ResourceNames::TurningSpeed)
+        .unwrap();
 
     locations.iter().enumerate().for_each(|(index, location)| {
         let velocity = velocities[index];

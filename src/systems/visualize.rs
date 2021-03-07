@@ -10,11 +10,15 @@ use crate::resource_names::ResourceNames;
 pub fn visualize_ranges_system(world: &World, context: &mut Context) -> GameResult {
     let wrapped_locations = world
         .query_one(crate::component_names::ComponentNames::Location)
+        .unwrap()
         .borrow();
-    let locations: &Vec<Point> = wrapped_locations.cast();
-    let sight_range: &f32 = world.get_resource::<ResourceNames>(crate::ResourceNames::SightRange);
-    let avoidance_range: &f32 =
-        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::AvoidRange);
+    let locations: &Vec<Point> = wrapped_locations.cast().unwrap();
+    let sight_range: &f32 = world
+        .get_resource::<ResourceNames>(crate::ResourceNames::SightRange)
+        .unwrap();
+    let avoidance_range: &f32 = world
+        .get_resource::<ResourceNames>(crate::resource_names::ResourceNames::AvoidRange)
+        .unwrap();
     let location = locations[0].to_array();
 
     let sight_range_mesh = create_range_mesh(context, *sight_range, WHITE, location)?;

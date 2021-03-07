@@ -80,6 +80,7 @@ impl FlockingRustState {
                         random::<f32>() * arena_size.1,
                     ),
                 )
+                .unwrap()
                 .with_component(
                     ComponentNames::Velocity,
                     Point::new(
@@ -87,8 +88,11 @@ impl FlockingRustState {
                         (rand::random::<f32>() - 0.5) * 5.0,
                     ),
                 )
+                .unwrap()
                 .with_component(ComponentNames::Acceleration, Point::new(0.0, 0.0))
-                .with_component(ComponentNames::Rotation, 0.0_f32);
+                .unwrap()
+                .with_component(ComponentNames::Rotation, 0.0_f32)
+                .unwrap();
         }
 
         Ok(Self {
@@ -103,7 +107,8 @@ impl EventHandler for FlockingRustState {
         handle_screen_size_change_system(&mut self.world, context, &mut self.has_resized)?;
         let update_fps: &u32 = self
             .world
-            .get_resource::<ResourceNames>(ResourceNames::UpdateFps);
+            .get_resource::<ResourceNames>(ResourceNames::UpdateFps)
+            .unwrap();
         let update_fps = *update_fps;
         while timer::check_update_time(context, update_fps) {
             update_boid_color_system(&mut self.world, timer::ticks(context));
@@ -120,7 +125,8 @@ impl EventHandler for FlockingRustState {
     fn draw(&mut self, context: &mut ggez::Context) -> GameResult {
         let background_color: &Color = self
             .world
-            .get_resource::<ResourceNames>(ResourceNames::BackgroundColor);
+            .get_resource::<ResourceNames>(ResourceNames::BackgroundColor)
+            .unwrap();
         graphics::clear(context, *background_color);
         draw_birds_system(context, &self.world)?;
         // visualize_ranges_system(&self.world, context)?;
@@ -130,7 +136,8 @@ impl EventHandler for FlockingRustState {
     fn resize_event(&mut self, _context: &mut Context, width: f32, height: f32) {
         let mut screen_size: &mut Point = self
             .world
-            .get_resource_mut::<ResourceNames>(ResourceNames::ArenaSize);
+            .get_resource_mut::<ResourceNames>(ResourceNames::ArenaSize)
+            .unwrap();
 
         screen_size.x = width;
         screen_size.y = height;
