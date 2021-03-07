@@ -10,8 +10,9 @@ pub fn handle_screen_size_change_system(
     context: &mut Context,
     has_resized: &mut bool,
 ) -> GameResult {
-    let arena_size: &Point =
-        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::ArenaSize);
+    let arena_size: &Point = world
+        .get_resource::<ResourceNames>(crate::resource_names::ResourceNames::ArenaSize)
+        .unwrap();
     let arena_rect = Rect::new(0.0, 0.0, arena_size.x, arena_size.y);
 
     set_screen_coordinates(context, arena_rect)?;

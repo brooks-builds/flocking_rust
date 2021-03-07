@@ -10,16 +10,18 @@ use crate::resource_names::ResourceNames;
 
 /// Query for the locations and then draw them out using GGEZ's draw method
 pub fn draw_birds_system(context: &mut Context, world: &World) -> GameResult {
-    let mesh: &Mesh = world.get_resource(ResourceNames::BirdMesh);
-    let color: &Color = world.get_resource(ResourceNames::BoidColor);
+    let mesh: &Mesh = world.get_resource(ResourceNames::BirdMesh).unwrap();
+    let color: &Color = world.get_resource(ResourceNames::BoidColor).unwrap();
     let wrapped_locations = world
         .query_one::<ComponentNames>(ComponentNames::Location)
+        .unwrap()
         .borrow();
-    let locations: &Vec<Point> = wrapped_locations.cast();
+    let locations: &Vec<Point> = wrapped_locations.cast().unwrap();
     let wrapped_rotations = world
         .query_one::<ComponentNames>(ComponentNames::Rotation)
+        .unwrap()
         .borrow();
-    let rotations: &Vec<f32> = wrapped_rotations.cast();
+    let rotations: &Vec<f32> = wrapped_rotations.cast().unwrap();
     locations
         .iter()
         .enumerate()

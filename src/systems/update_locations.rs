@@ -5,12 +5,21 @@ use bbecs::world::World;
 use crate::component_names::ComponentNames;
 
 pub fn update_locations_system(world: &World) {
-    let mut wrapped_locations = world.query_one(ComponentNames::Location).borrow_mut();
-    let locations = wrapped_locations.cast_mut();
-    let mut wrapped_velocities = world.query_one(ComponentNames::Velocity).borrow_mut();
-    let velocities: &mut Vec<Point> = wrapped_velocities.cast_mut();
-    let mut wrapped_accelerations = world.query_one(ComponentNames::Acceleration).borrow_mut();
-    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
+    let mut wrapped_locations = world
+        .query_one(ComponentNames::Location)
+        .unwrap()
+        .borrow_mut();
+    let locations = wrapped_locations.cast_mut().unwrap();
+    let mut wrapped_velocities = world
+        .query_one(ComponentNames::Velocity)
+        .unwrap()
+        .borrow_mut();
+    let velocities: &mut Vec<Point> = wrapped_velocities.cast_mut().unwrap();
+    let mut wrapped_accelerations = world
+        .query_one(ComponentNames::Acceleration)
+        .unwrap()
+        .borrow_mut();
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut().unwrap();
 
     locations
         .iter_mut()

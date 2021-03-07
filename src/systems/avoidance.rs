@@ -7,18 +7,24 @@ use crate::resource_names::ResourceNames;
 /// we want all of the birds to avoid each other. We will be doing this by querying for all
 /// of the birds within range of each other, then accelerating away from each of these birds.
 pub fn avoidance_system(world: &World) {
-    let avoid_range: &f32 = world.get_resource(crate::resource_names::ResourceNames::AvoidRange);
-    let locations = world.query_one(crate::component_names::ComponentNames::Location);
+    let avoid_range: &f32 = world
+        .get_resource(crate::resource_names::ResourceNames::AvoidRange)
+        .unwrap();
+    let locations = world
+        .query_one(crate::component_names::ComponentNames::Location)
+        .unwrap();
     let mut wrapped_accelerations = world
         .query_one(crate::component_names::ComponentNames::Acceleration)
+        .unwrap()
         .borrow_mut();
-    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
-    let turning_speed: &f32 = world.get_resource(ResourceNames::TurningSpeed);
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut().unwrap();
+    let turning_speed: &f32 = world.get_resource(ResourceNames::TurningSpeed).unwrap();
 
     locations
         .clone()
         .borrow()
         .cast()
+        .unwrap()
         .iter()
         .enumerate()
         .for_each(|(index, location): (usize, &Point)| {
@@ -27,6 +33,7 @@ pub fn avoidance_system(world: &World) {
                 .clone()
                 .borrow()
                 .cast()
+                .unwrap()
                 .iter()
                 .enumerate()
                 .for_each(|(other_index, other_location): (usize, &Point)| {

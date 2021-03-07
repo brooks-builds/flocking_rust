@@ -5,30 +5,41 @@ use bbecs::world::{World, WorldMethods};
 use crate::resource_names::ResourceNames;
 
 pub fn alignment_system(world: &World) {
-    let locations_wrapper = world.query_one(crate::component_names::ComponentNames::Location);
-    let velocities_wrapper = world.query_one(crate::component_names::ComponentNames::Velocity);
+    let locations_wrapper = world
+        .query_one(crate::component_names::ComponentNames::Location)
+        .unwrap();
+    let velocities_wrapper = world
+        .query_one(crate::component_names::ComponentNames::Velocity)
+        .unwrap();
     let mut wrapped_accelerations = world
         .query_one(crate::component_names::ComponentNames::Acceleration)
+        .unwrap()
         .borrow_mut();
-    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut();
-    let sight_range: &f32 =
-        world.get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange);
-    let turning_speed: &f32 = world.get_resource::<ResourceNames>(ResourceNames::TurningSpeed);
+    let accelerations: &mut Vec<Point> = wrapped_accelerations.cast_mut().unwrap();
+    let sight_range: &f32 = world
+        .get_resource::<ResourceNames>(crate::resource_names::ResourceNames::SightRange)
+        .unwrap();
+    let turning_speed: &f32 = world
+        .get_resource::<ResourceNames>(ResourceNames::TurningSpeed)
+        .unwrap();
 
     locations_wrapper
         .clone()
         .borrow()
         .cast()
+        .unwrap()
         .iter()
         .enumerate()
         .for_each(|(my_index, my_location): (usize, &Point)| {
             let nearby_indexes = get_nearby_indexes(
                 my_location,
-                locations_wrapper.clone().borrow().cast(),
+                locations_wrapper.clone().borrow().cast().unwrap(),
                 *sight_range,
             );
-            let nearby_velocities =
-                get_velocities_by_index(velocities_wrapper.borrow().cast(), nearby_indexes);
+            let nearby_velocities = get_velocities_by_index(
+                velocities_wrapper.borrow().cast().unwrap(),
+                nearby_indexes,
+            );
             if !nearby_velocities.is_empty() {
                 let mut average_velocity = calculate_average_velocity(nearby_velocities);
                 average_velocity.normalize();
